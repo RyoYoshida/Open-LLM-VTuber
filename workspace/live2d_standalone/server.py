@@ -18,6 +18,7 @@ from urllib.parse import unquote, urlparse
 
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parents[1]
+MODEL_DICT_PATH = PROJECT_ROOT / "model_dict.json"
 LIVE2D_MODELS_DIR = PROJECT_ROOT / "live2d-models"
 LIVE2D_CORE_JS_CANDIDATES = [
     PROJECT_ROOT / "frontend" / "libs" / "live2dcubismcore.min.js",
@@ -45,6 +46,10 @@ class Live2DDemoHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = unquote(parsed.path)
+
+        if path == "/api/model-configs":
+            self._handle_model_configs_api()
+            return
 
         if path == "/api/models":
             self._handle_models_api()
@@ -75,19 +80,42 @@ class Live2DDemoHandler(SimpleHTTPRequestHandler):
         print(f"[live2d-standalone] {self.address_string()} - {format % args}")
 
     def _handle_models_api(self) -> None:
-        models: list[dict[str, str]] = []
+        models = self._load_model_configs()
+        payload = [
+            {
+                "name": str(model.get("name", "unknown")),
+                "path": str(model.get("url", "")),
+                "folder": str(model.get("url", "")).split("/runtime/")[0].lstrip("/"),
+            }
+            for model in models
+        ]
+
+        body = json.dumps({"models": payload}, ensure_ascii=False).encode("utf-8")
+        self._send_json(body)
+
+    def _handle_model_configs_api(self) -> None:
+        body = json.dumps({"models": self._load_model_configs()}, ensure_ascii=False).encode(
+            "utf-8"
+        )
+        self._send_json(body)
+
+    def _load_model_configs(self) -> list[dict[str, object]]:
+        if MODEL_DICT_PATH.exists() and MODEL_DICT_PATH.is_file():
+            try:
+                data = json.loads(MODEL_DICT_PATH.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    return [model for model in data if isinstance(model, dict)]
+            except json.JSONDecodeError:
+                pass
+
+        models: list[dict[str, object]] = []
         for model_json in sorted(LIVE2D_MODELS_DIR.rglob("*.model3.json")):
             rel = model_json.relative_to(PROJECT_ROOT).as_posix()
             display_name = model_json.stem.removesuffix(".model3")
-            models.append(
-                {
-                    "name": display_name,
-                    "path": f"/{rel}",
-                    "folder": model_json.parent.relative_to(PROJECT_ROOT).as_posix(),
-                }
-            )
+            models.append({"name": display_name, "url": f"/{rel}"})
+        return models
 
-        body = json.dumps({"models": models}, ensure_ascii=False).encode("utf-8")
+    def _send_json(self, body: bytes) -> None:
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))

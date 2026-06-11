@@ -84,6 +84,31 @@
         background: rgba(26, 42, 65, 0.95);
       }
 
+      .section {
+        margin-top: 16px;
+      }
+
+      .section-title {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .button-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .button-grid button {
+        width: auto;
+        flex: 1 1 calc(50% - 8px);
+        margin-top: 0;
+        padding: 8px 10px;
+      }
+
       #status {
         margin-top: 12px;
         min-height: 40px;
@@ -127,6 +152,14 @@
         <select id="model-select"></select>
 
         <button id="load-btn" type="button">モデルを読み込む</button>
+        <div class="section">
+          <p class="section-title">表情</p>
+          <div id="expression-buttons" class="button-grid"></div>
+        </div>
+        <div class="section">
+          <p class="section-title">アクション</p>
+          <div id="motion-buttons" class="button-grid"></div>
+        </div>
         <div id="status"></div>
       </aside>
       <main id="stage"></main>
