@@ -25,6 +25,100 @@
             "HitAreaBody": {
                 "": 1
             }
+        },
+        "model3Path": "/live2d-models/mao_pro/runtime/mao_pro.model3.json",
+        "availableExpressions": [
+            {
+                "name": "exp_01",
+                "file": "expressions/exp_01.exp3.json",
+                "index": 0
+            },
+            {
+                "name": "exp_02",
+                "file": "expressions/exp_02.exp3.json",
+                "index": 1
+            },
+            {
+                "name": "exp_03",
+                "file": "expressions/exp_03.exp3.json",
+                "index": 2
+            },
+            {
+                "name": "exp_04",
+                "file": "expressions/exp_04.exp3.json",
+                "index": 3
+            },
+            {
+                "name": "exp_05",
+                "file": "expressions/exp_05.exp3.json",
+                "index": 4
+            },
+            {
+                "name": "exp_06",
+                "file": "expressions/exp_06.exp3.json",
+                "index": 5
+            },
+            {
+                "name": "exp_07",
+                "file": "expressions/exp_07.exp3.json",
+                "index": 6
+            },
+            {
+                "name": "exp_08",
+                "file": "expressions/exp_08.exp3.json",
+                "index": 7
+            }
+        ],
+        "availableMotions": {
+            "Idle": [
+                {
+                    "index": 0,
+                    "name": "mtn_01.motion3",
+                    "file": "motions/mtn_01.motion3.json"
+                }
+            ],
+            "": [
+                {
+                    "index": 0,
+                    "name": "mtn_02.motion3",
+                    "file": "motions/mtn_02.motion3.json"
+                },
+                {
+                    "index": 1,
+                    "name": "mtn_03.motion3",
+                    "file": "motions/mtn_03.motion3.json"
+                },
+                {
+                    "index": 2,
+                    "name": "mtn_04.motion3",
+                    "file": "motions/mtn_04.motion3.json"
+                },
+                {
+                    "index": 3,
+                    "name": "special_01.motion3",
+                    "file": "motions/special_01.motion3.json"
+                },
+                {
+                    "index": 4,
+                    "name": "special_02.motion3",
+                    "file": "motions/special_02.motion3.json"
+                },
+                {
+                    "index": 5,
+                    "name": "special_03.motion3",
+                    "file": "motions/special_03.motion3.json"
+                }
+            ]
+        },
+        "availableHitAreas": [
+            "HitAreaHead",
+            "HitAreaBody"
+        ],
+        "actionSummary": {
+            "expressions": 8,
+            "motionGroups": 2,
+            "motionItems": 7,
+            "hitAreas": 2
         }
     },
     {
@@ -53,6 +147,157 @@
             "HitAreaBody": {
                 "": 1
             }
+        },
+        "model3Path": "/live2d-models/haru_greeter_pro_jp/runtime/haru_greeter_t05.model3.json",
+        "availableExpressions": [],
+        "availableMotions": {
+            "": [
+                {
+                    "index": 0,
+                    "name": "haru_g_idle.motion3",
+                    "file": "motion/haru_g_idle.motion3.json"
+                },
+                {
+                    "index": 1,
+                    "name": "haru_g_m01.motion3",
+                    "file": "motion/haru_g_m01.motion3.json"
+                },
+                {
+                    "index": 2,
+                    "name": "haru_g_m02.motion3",
+                    "file": "motion/haru_g_m02.motion3.json"
+                },
+                {
+                    "index": 3,
+                    "name": "haru_g_m03.motion3",
+                    "file": "motion/haru_g_m03.motion3.json"
+                },
+                {
+                    "index": 4,
+                    "name": "haru_g_m04.motion3",
+                    "file": "motion/haru_g_m04.motion3.json"
+                },
+                {
+                    "index": 5,
+                    "name": "haru_g_m05.motion3",
+                    "file": "motion/haru_g_m05.motion3.json"
+                },
+                {
+                    "index": 6,
+                    "name": "haru_g_m06.motion3",
+                    "file": "motion/haru_g_m06.motion3.json"
+                },
+                {
+                    "index": 7,
+                    "name": "haru_g_m07.motion3",
+                    "file": "motion/haru_g_m07.motion3.json"
+                },
+                {
+                    "index": 8,
+                    "name": "haru_g_m08.motion3",
+                    "file": "motion/haru_g_m08.motion3.json"
+                },
+                {
+                    "index": 9,
+                    "name": "haru_g_m09.motion3",
+                    "file": "motion/haru_g_m09.motion3.json"
+                },
+                {
+                    "index": 10,
+                    "name": "haru_g_m10.motion3",
+                    "file": "motion/haru_g_m10.motion3.json"
+                },
+                {
+                    "index": 11,
+                    "name": "haru_g_m11.motion3",
+                    "file": "motion/haru_g_m11.motion3.json"
+                },
+                {
+                    "index": 12,
+                    "name": "haru_g_m12.motion3",
+                    "file": "motion/haru_g_m12.motion3.json"
+                },
+                {
+                    "index": 13,
+                    "name": "haru_g_m13.motion3",
+                    "file": "motion/haru_g_m13.motion3.json"
+                },
+                {
+                    "index": 14,
+                    "name": "haru_g_m14.motion3",
+                    "file": "motion/haru_g_m14.motion3.json"
+                },
+                {
+                    "index": 15,
+                    "name": "haru_g_m15.motion3",
+                    "file": "motion/haru_g_m15.motion3.json"
+                },
+                {
+                    "index": 16,
+                    "name": "haru_g_m16.motion3",
+                    "file": "motion/haru_g_m16.motion3.json"
+                },
+                {
+                    "index": 17,
+                    "name": "haru_g_m17.motion3",
+                    "file": "motion/haru_g_m17.motion3.json"
+                },
+                {
+                    "index": 18,
+                    "name": "haru_g_m18.motion3",
+                    "file": "motion/haru_g_m18.motion3.json"
+                },
+                {
+                    "index": 19,
+                    "name": "haru_g_m19.motion3",
+                    "file": "motion/haru_g_m19.motion3.json"
+                },
+                {
+                    "index": 20,
+                    "name": "haru_g_m20.motion3",
+                    "file": "motion/haru_g_m20.motion3.json"
+                },
+                {
+                    "index": 21,
+                    "name": "haru_g_m21.motion3",
+                    "file": "motion/haru_g_m21.motion3.json"
+                },
+                {
+                    "index": 22,
+                    "name": "haru_g_m22.motion3",
+                    "file": "motion/haru_g_m22.motion3.json"
+                },
+                {
+                    "index": 23,
+                    "name": "haru_g_m23.motion3",
+                    "file": "motion/haru_g_m23.motion3.json"
+                },
+                {
+                    "index": 24,
+                    "name": "haru_g_m24.motion3",
+                    "file": "motion/haru_g_m24.motion3.json"
+                },
+                {
+                    "index": 25,
+                    "name": "haru_g_m25.motion3",
+                    "file": "motion/haru_g_m25.motion3.json"
+                },
+                {
+                    "index": 26,
+                    "name": "haru_g_m26.motion3",
+                    "file": "motion/haru_g_m26.motion3.json"
+                }
+            ]
+        },
+        "availableHitAreas": [
+            "HitArea",
+            "HitArea2"
+        ],
+        "actionSummary": {
+            "expressions": 0,
+            "motionGroups": 1,
+            "motionItems": 27,
+            "hitAreas": 2
         }
     },
     {
@@ -81,6 +326,45 @@
             "HitAreaBody": {
                 "": 1
             }
+        },
+        "model3Path": "/live2d-models/shizuku/runtime/shizuku.model3.json",
+        "availableExpressions": [],
+        "availableMotions": {
+            "FlickUp": [
+                {
+                    "index": 0,
+                    "name": "01.motion3",
+                    "file": "motion/01.motion3.json"
+                }
+            ],
+            "Tap": [
+                {
+                    "index": 0,
+                    "name": "02.motion3",
+                    "file": "motion/02.motion3.json"
+                }
+            ],
+            "Flick3": [
+                {
+                    "index": 0,
+                    "name": "03.motion3",
+                    "file": "motion/03.motion3.json"
+                }
+            ],
+            "Idle": [
+                {
+                    "index": 0,
+                    "name": "04.motion3",
+                    "file": "motion/04.motion3.json"
+                }
+            ]
+        },
+        "availableHitAreas": [],
+        "actionSummary": {
+            "expressions": 0,
+            "motionGroups": 4,
+            "motionItems": 4,
+            "hitAreas": 0
         }
     }
 ]

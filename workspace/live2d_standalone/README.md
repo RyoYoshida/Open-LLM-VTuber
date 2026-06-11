@@ -25,9 +25,18 @@ http://127.0.0.1:8765
 ## 3. できること
 
 - `model_dict.json` に定義されたモデルを自動表示
+- モデル配下の `model3.json` から expression / motion を検出してボタンを自動生成
 - 表情ボタンで `emotionMap` に応じた expression を切り替え
-- アクションボタンで検出された motion group を再生
+- アクションボタンで検出された motion group と個別 motion を再生
 - モデルをクリックすると tap 用アクションを再生（設定がある場合）
+
+## 4. 設定の再生成
+
+モデル配下のファイル構成を反映して `model_dict.json` を更新するには、次を実行します。
+
+```bash
+python workspace/live2d_standalone/sync_model_dict.py
+```
 
 ## 注意
 

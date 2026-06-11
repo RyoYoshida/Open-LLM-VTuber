@@ -43,6 +43,8 @@
         border-right: 1px solid var(--line);
         padding: 20px;
         backdrop-filter: blur(8px);
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       h1 {
@@ -88,6 +90,29 @@
         margin-top: 16px;
       }
 
+      .section-scroll {
+        max-height: 26vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+      }
+
+      .section-scroll::-webkit-scrollbar,
+      .panel::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .section-scroll::-webkit-scrollbar-thumb,
+      .panel::-webkit-scrollbar-thumb {
+        background: rgba(95, 179, 255, 0.5);
+        border-radius: 999px;
+      }
+
+      .section-scroll::-webkit-scrollbar-track,
+      .panel::-webkit-scrollbar-track {
+        background: rgba(7, 14, 24, 0.45);
+      }
+
       .section-title {
         margin: 0 0 8px;
         color: var(--muted);
@@ -117,6 +142,23 @@
         white-space: pre-wrap;
       }
 
+      #validation {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid rgba(95, 179, 255, 0.25);
+        border-radius: 10px;
+        background: rgba(7, 14, 24, 0.45);
+        color: var(--muted);
+        font-size: 0.78rem;
+        white-space: pre-wrap;
+      }
+
+      #status,
+      #validation {
+        max-height: 14vh;
+        overflow-y: auto;
+      }
+
       #stage {
         position: relative;
         width: 100%;
@@ -138,6 +180,11 @@
         .panel {
           border-right: 0;
           border-bottom: 1px solid var(--line);
+          max-height: 48vh;
+        }
+
+        .section-scroll {
+          max-height: 22vh;
         }
       }
     </style>
@@ -154,13 +201,18 @@
         <button id="load-btn" type="button">モデルを読み込む</button>
         <div class="section">
           <p class="section-title">表情</p>
-          <div id="expression-buttons" class="button-grid"></div>
+          <div class="section-scroll">
+            <div id="expression-buttons" class="button-grid"></div>
+          </div>
         </div>
         <div class="section">
           <p class="section-title">アクション</p>
-          <div id="motion-buttons" class="button-grid"></div>
+          <div class="section-scroll">
+            <div id="motion-buttons" class="button-grid"></div>
+          </div>
         </div>
         <div id="status"></div>
+        <div id="validation"></div>
       </aside>
       <main id="stage"></main>
     </div>

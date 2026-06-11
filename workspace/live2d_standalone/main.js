@@ -3,6 +3,7 @@ const modelSelect = document.getElementById("model-select");
 const loadButton = document.getElementById("load-btn");
 const expressionButtonsEl = document.getElementById("expression-buttons");
 const motionButtonsEl = document.getElementById("motion-buttons");
+const validationEl = document.getElementById("validation");
 const stageEl = document.getElementById("stage");
 
 const app = new PIXI.Application({
@@ -14,8 +15,8 @@ stageEl.appendChild(app.view);
 
 let currentModel = null;
 let currentConfig = null;
+let currentModelSettings = null;
 let currentActionTapGroup = null;
-let currentMotionGroups = [];
 
 function setStatus(message) {
   statusEl.textContent = message;
@@ -54,9 +55,19 @@ async function fetchModels() {
   return payload.models;
 }
 
+async function fetchModelSettings(modelPath) {
+  const resp = await fetch(modelPath);
+  if (!resp.ok) {
+    throw new Error(`model3.json の取得に失敗しました: ${resp.status}`);
+  }
+
+  return resp.json();
+}
+
 function clearControlButtons() {
   expressionButtonsEl.replaceChildren();
   motionButtonsEl.replaceChildren();
+  validationEl.textContent = "";
 }
 
 function createControlButton(label, onClick) {
@@ -67,12 +78,21 @@ function createControlButton(label, onClick) {
   return button;
 }
 
-function getMotionGroups(model) {
-  return Object.keys(model.internalModel.motionManager?.definitions ?? {});
+function getExpressionEntries(config, settings) {
+  return config?.availableExpressions ?? settings?.FileReferences?.Expressions ?? [];
 }
 
-function pickTapMotionGroup(model) {
-  const groups = getMotionGroups(model);
+function getMotionGroups(config, settings) {
+  return Object.keys(config?.availableMotions ?? settings?.FileReferences?.Motions ?? {});
+}
+
+function getMotionItems(groupName, config, settings) {
+  const motions = config?.availableMotions ?? settings?.FileReferences?.Motions ?? {};
+  return motions?.[groupName] ?? [];
+}
+
+function pickTapMotionGroup(config, settings) {
+  const groups = getMotionGroups(config, settings);
   const preferredNames = ["TapBody", "tap_body", "Tap", "tap"];
 
   for (const name of preferredNames) {
@@ -81,50 +101,149 @@ function pickTapMotionGroup(model) {
     }
   }
 
-  const idleGroup = model.internalModel.motionManager?.groups?.idle;
+  const idleGroup = currentConfig?.idleMotionGroupName ?? "Idle";
   const nonIdleGroups = groups.filter((group) => group !== idleGroup);
   return nonIdleGroups[0] ?? groups[0] ?? null;
 }
 
-function refreshControls(model, config) {
+function getDefaultMotionGroup(config, settings) {
+  const groups = getMotionGroups(config, settings);
+  return groups.includes("") ? "" : groups[0] ?? null;
+}
+
+function labelMotionGroup(group) {
+  if (group === "") {
+    return "default / tap";
+  }
+
+  return group;
+}
+
+function validateModelBindings(config, settings) {
+  const messages = [];
+  const expressions = getExpressionEntries(config, settings);
+  const expressionCount = expressions.length;
+  const defaultMotionGroup = getDefaultMotionGroup(config, settings);
+  const motionGroups = getMotionGroups(config, settings);
+
+  const validExpressions = [];
+  const invalidExpressions = [];
+  for (const [emotionName, expressionIndex] of Object.entries(config?.emotionMap ?? {})) {
+    if (Number.isInteger(expressionIndex) && expressionIndex >= 0 && expressionIndex < expressionCount) {
+      validExpressions.push([emotionName, expressionIndex]);
+    } else {
+      invalidExpressions.push(`${emotionName} -> ${expressionIndex}`);
+    }
+  }
+
+  const tapEntries = [];
+  const invalidTaps = [];
+  for (const [hitArea, motions] of Object.entries(config?.tapMotions ?? {})) {
+    const motionIndex = Object.values(motions ?? {}).find((value) => Number.isInteger(value));
+    const motionCount =
+      defaultMotionGroup !== null
+        ? settings?.FileReferences?.Motions?.[defaultMotionGroup]?.length ?? 0
+        : 0;
+
+    if (defaultMotionGroup !== null && Number.isInteger(motionIndex) && motionIndex < motionCount) {
+      tapEntries.push([hitArea, motionIndex]);
+    } else {
+      invalidTaps.push(`${hitArea} -> ${motionIndex ?? "none"}`);
+    }
+  }
+
+  const declaredIdleGroup = config?.idleMotionGroupName ?? "Idle";
+  if (!motionGroups.includes(declaredIdleGroup)) {
+    messages.push(`idleMotionGroupName '${declaredIdleGroup}' is not present in model3.json`);
+  }
+
+  if (invalidExpressions.length > 0) {
+    messages.push(`invalid expressions: ${invalidExpressions.join(", ")}`);
+  }
+
+  if (invalidTaps.length > 0) {
+    messages.push(`invalid tap actions: ${invalidTaps.join(", ")}`);
+  }
+
+  if (messages.length === 0) {
+    messages.push(
+      `validation ok: ${validExpressions.length} mapped expressions, ${tapEntries.length} tap actions, ${motionGroups.length} motion groups, ${expressionCount} expressions in model`
+    );
+  }
+
+  return { validExpressions, tapEntries, messages };
+}
+
+function refreshControls(model, config, settings) {
   clearControlButtons();
 
-  const emotionMap = config?.emotionMap ?? {};
-  const emotionEntries = Object.entries(emotionMap);
-  if (emotionEntries.length > 0) {
+  const validation = validateModelBindings(config, settings);
+  validationEl.textContent = validation.messages.join("\n");
+
+  const expressionEntries = getExpressionEntries(config, settings);
+  if (expressionEntries.length > 0) {
     expressionButtonsEl.appendChild(
-      createControlButton("random", () => {
+      createControlButton("random expression", () => {
         void model.expression();
       })
     );
 
-    for (const [emotionName, expressionIndex] of emotionEntries) {
+    for (const [emotionName, expressionIndex] of Object.entries(config?.emotionMap ?? {})) {
+      if (!Number.isInteger(expressionIndex)) {
+        continue;
+      }
+
       expressionButtonsEl.appendChild(
-        createControlButton(emotionName, () => {
+        createControlButton(`emotion: ${emotionName}`, () => {
+          void model.expression(expressionIndex);
+        })
+      );
+    }
+
+    for (const expression of expressionEntries) {
+      const expressionName = expression?.name ?? expression?.Name ?? "expression";
+      const expressionIndex = expression?.index ?? expressionEntries.indexOf(expression);
+      expressionButtonsEl.appendChild(
+        createControlButton(`file: ${expressionName}`, () => {
           void model.expression(expressionIndex);
         })
       );
     }
   }
 
-  currentMotionGroups = getMotionGroups(model);
-  currentActionTapGroup = pickTapMotionGroup(model);
+  const motionGroups = getMotionGroups(config, settings);
+  currentActionTapGroup = pickTapMotionGroup(config, settings);
 
-  for (const group of currentMotionGroups) {
+  if (motionGroups.includes(currentConfig?.idleMotionGroupName ?? "Idle")) {
     motionButtonsEl.appendChild(
-      createControlButton(group, () => {
-        void model.motion(group);
+      createControlButton("idle", () => {
+        void model.motion(currentConfig?.idleMotionGroupName ?? "Idle");
       })
     );
   }
 
-  const tapMotions = config?.tapMotions ?? {};
-  for (const [hitArea, motions] of Object.entries(tapMotions)) {
-    const indices = Object.values(motions ?? {}).filter((value) => Number.isInteger(value));
-    const motionIndex = indices[0];
+  for (const groupName of motionGroups) {
+    const motionItems = getMotionItems(groupName, config, settings);
     motionButtonsEl.appendChild(
-      createControlButton(`${hitArea} tap`, () => {
-        if (currentActionTapGroup === null || motionIndex === undefined) {
+      createControlButton(`group: ${labelMotionGroup(groupName)}`, () => {
+        void model.motion(groupName);
+      })
+    );
+
+    motionItems.forEach((motionItem, index) => {
+      const motionLabel = motionItem?.name ?? motionItem?.File ?? `motion ${index + 1}`;
+      motionButtonsEl.appendChild(
+        createControlButton(`${labelMotionGroup(groupName)} #${index + 1}: ${motionLabel}`, () => {
+          void model.motion(groupName, index);
+        })
+      );
+    });
+  }
+
+  for (const [hitArea, motionIndex] of validation.tapEntries) {
+    motionButtonsEl.appendChild(
+      createControlButton(`hit: ${hitArea}`, () => {
+        if (!currentActionTapGroup) {
           setStatus(`アクション未設定: ${hitArea}`);
           return;
         }
@@ -188,13 +307,23 @@ async function loadModel(modelPath) {
   const Live2DModel = getLive2DModelClass();
   const idleMotionGroup = currentConfig?.idleMotionGroupName;
   const model = await Live2DModel.from(modelPath, idleMotionGroup ? { idleMotionGroup } : {});
+  currentModelSettings = await fetchModelSettings(modelPath);
 
   applyModelTransform(model, currentConfig);
 
   model.interactive = true;
   model.buttonMode = true;
   model.cursor = "pointer";
-  model.on("pointerdown", () => {
+  model.on("pointerdown", (event) => {
+    const globalPoint = event?.global;
+    if (globalPoint) {
+      const hitAreas = model.hitTest(globalPoint.x, globalPoint.y);
+      if (hitAreas.length > 0) {
+        model.emit("hit", hitAreas);
+        return;
+      }
+    }
+
     if (currentActionTapGroup) {
       void model.motion(currentActionTapGroup);
     }
@@ -204,7 +333,7 @@ async function loadModel(modelPath) {
 
   app.stage.addChild(model);
   currentModel = model;
-  refreshControls(model, currentConfig);
+  refreshControls(model, currentConfig, currentModelSettings);
   setStatus(`表示中: ${modelPath}`);
 }
 
@@ -254,6 +383,7 @@ async function bootstrap() {
   } catch (error) {
     clearControlButtons();
     setStatus(`初期化失敗: ${error.message}`);
+    validationEl.textContent = "";
   }
 }
 

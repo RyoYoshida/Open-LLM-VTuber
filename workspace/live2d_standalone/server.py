@@ -15,10 +15,11 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+from model_catalog import load_model_entries
+
 
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parents[1]
-MODEL_DICT_PATH = PROJECT_ROOT / "model_dict.json"
 LIVE2D_MODELS_DIR = PROJECT_ROOT / "live2d-models"
 LIVE2D_CORE_JS_CANDIDATES = [
     PROJECT_ROOT / "frontend" / "libs" / "live2dcubismcore.min.js",
@@ -90,30 +91,15 @@ class Live2DDemoHandler(SimpleHTTPRequestHandler):
             for model in models
         ]
 
-        body = json.dumps({"models": payload}, ensure_ascii=False).encode("utf-8")
+        body = self._to_json_body({"models": payload})
         self._send_json(body)
 
     def _handle_model_configs_api(self) -> None:
-        body = json.dumps({"models": self._load_model_configs()}, ensure_ascii=False).encode(
-            "utf-8"
-        )
+        body = self._to_json_body({"models": self._load_model_configs()})
         self._send_json(body)
 
     def _load_model_configs(self) -> list[dict[str, object]]:
-        if MODEL_DICT_PATH.exists() and MODEL_DICT_PATH.is_file():
-            try:
-                data = json.loads(MODEL_DICT_PATH.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    return [model for model in data if isinstance(model, dict)]
-            except json.JSONDecodeError:
-                pass
-
-        models: list[dict[str, object]] = []
-        for model_json in sorted(LIVE2D_MODELS_DIR.rglob("*.model3.json")):
-            rel = model_json.relative_to(PROJECT_ROOT).as_posix()
-            display_name = model_json.stem.removesuffix(".model3")
-            models.append({"name": display_name, "url": f"/{rel}"})
-        return models
+        return load_model_entries()
 
     def _send_json(self, body: bytes) -> None:
         self.send_response(HTTPStatus.OK)
@@ -121,6 +107,11 @@ class Live2DDemoHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _to_json_body(self, payload: object) -> bytes:
+        import json
+
+        return json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
     def _send_file(self, path: Path) -> None:
         if not path.exists() or not path.is_file():
@@ -138,7 +129,8 @@ class Live2DDemoHandler(SimpleHTTPRequestHandler):
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Standalone Live2D demo server")
+    parser = argparse.ArgumentParser(
+        description="Standalone Live2D demo server")
     parser.add_argument("--host", default="127.0.0.1", help="Bind host")
     parser.add_argument("--port", type=int, default=8765, help="Bind port")
     return parser.parse_args()
