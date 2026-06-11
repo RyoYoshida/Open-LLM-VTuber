@@ -1,0 +1,20 @@
+services:
+  open-llm-vtuber:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: open-llm-vtuber:latest
+    container_name: open-llm-vtuber
+    ports:
+      - "12393:12393"
+    volumes:
+      # Required: conf.yaml must exist at ./conf/conf.yaml
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - docker_default
+
+networks:
+  docker_default:
+    external: true
+    name: docker_default
